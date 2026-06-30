@@ -1,0 +1,20 @@
+[project]
+name = "task-utils"
+version = "0.1.0"
+description = "Small package containing some utility code used in Harp-Bonsai tasks at the Champalimaud Foundation"
+readme = "README.md"
+authors = [
+    { name = "José Grilo", email = "jose.grilo@research.fchampalimaud.org" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.13.4",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+task-utils = "task_utils:main"
+
+[build-system]
+requires = ["uv_build>=0.11.24,<0.12.0"]
+build-backend = "uv_build"
