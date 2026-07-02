@@ -3,7 +3,7 @@ import json
 from enum import Enum
 from os import PathLike
 from subprocess import CompletedProcess, run
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Type, TypeVar
 
 from pydantic import BaseModel, PydanticInvalidForJsonSchema
 from pydantic.json_schema import (
@@ -14,6 +14,8 @@ from pydantic.json_schema import (
     models_json_schema,
 )
 from pydantic_core import PydanticOmit, core_schema, to_jsonable_python
+
+T = TypeVar("T", bound=BaseModel)
 
 
 class CustomGenerateJsonSchema(GenerateJsonSchema):
@@ -172,7 +174,7 @@ class CustomGenerateJsonSchema(GenerateJsonSchema):
 
 
 def export_schema(
-    model: BaseModel,
+    model: Type[T],
     schema_generator: Type[GenerateJsonSchema] = CustomGenerateJsonSchema,
     mode: JsonSchemaMode = "serialization",
     def_keyword: str = "definitions",
