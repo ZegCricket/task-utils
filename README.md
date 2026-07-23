@@ -3,6 +3,7 @@
 This repository contains the code for the `task-utils` Python package that can be used to aid the development of Bonsai projects.
 
 The package is divided into 2 modules:
+
 - `sgen` - helper code for defining data structures and generating the respective schemas and Bonsai extensions by using the Bonsai.Sgen tool.
 - `gui` - helper code for the development of GUIs for behavioral tasks.
 
