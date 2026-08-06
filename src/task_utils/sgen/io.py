@@ -98,7 +98,12 @@ def save_model(
                 json.dump(model_dict, file, default=str)
 
 
-def generate_schema(cls: Type[T], proj_dir: Path) -> None:
+def generate_schema(
+    cls: Type[T],
+    *,
+    schema_path: Path = Path("../src/Extensions"),
+    extension_path: Path = Path("../src/config/schemas"),
+) -> None:
     """
     Generates the schema of a Pydantic class as well as the respective Bonsai extensions. This function requires that the Bonsai.Sgen tool is installed.
 
@@ -106,19 +111,20 @@ def generate_schema(cls: Type[T], proj_dir: Path) -> None:
     ----------
     cls : Type[T]
         The class for which the JSON schema will be generated.
-    proj_dir : Path
-        The path to the root directory of the project. It assumes a specific directory organization.
+    schema_path : Path, optional
+        The path to the directory where the JSON schema will be saved.
+    extension_path : Path, optional
+        The path to the directory where the Bonsai extensions file will be saved.
     """
     json_schema = export_schema(cls)
     schema_name = cls.__name__
     _dashed = pascal_to_snake_case(schema_name).replace("_", "-")
-    schema_path = proj_dir / rf"src/config/schemas/{_dashed}-schema.json"
     with open(schema_path, "w", encoding="utf-8") as f:
         f.write(json_schema)
 
     bonsai_sgen(
-        schema_path=schema_path,
-        output_path=proj_dir / r"src/Extensions",
+        schema_path=schema_path / f"{_dashed}-schema.json",
+        output_path=extension_path,
         namespace=schema_name,
         serializer=[BonsaiSgenSerializers.JSON, BonsaiSgenSerializers.YAML],
     )
