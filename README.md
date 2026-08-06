@@ -13,3 +13,7 @@ The package is divided into 2 modules:
 ## Installation
 > [!WARNING]
 > _Under construction_
+
+## Documentation
+
+Click [here](https://zegcricket.github.io/task-utils/) to go to the documentation.
