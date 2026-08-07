@@ -1,3 +1,5 @@
+from typing import Optional
+
 import serial.tools.list_ports
 from harp.protocol.exceptions import HarpException, HarpTimeoutException
 from harp.serial import Device
@@ -14,26 +16,34 @@ from serial.serialutil import SerialException
 
 
 class FileExplorer(QWidget):
-    def __init__(self):
+    def __init__(self, *args, text: str = "", **kwargs):
+        super().__init__(*args, **kwargs)
         layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
 
-        self.line = QLineEdit(self)
+        self.line = QLineEdit(self, text=text)
         layout.addWidget(self.line)
 
-        self.button = QPushButton("Browse", self)
+        self.button = QPushButton("Browse", parent=self)
         self.button.clicked.connect(self.browse_files)
         layout.addWidget(self.button)
 
         self.setLayout(layout)
 
     def browse_files(self):
-        file = QFileDialog.getExistingDirectory(self, caption="Pick Directory")
+        file = QFileDialog.getExistingDirectory(caption="Pick Directory")
         self.line.setText(file)
 
 
 class SerialComboBox(QComboBox):
     def __init__(
-        self, parent, id: int, device_name: str, placeholder_text: str = "COMx"
+        self,
+        parent,
+        id: int,
+        device_name: str,
+        placeholder_text: str = "COMx",
+        *,
+        value: Optional[str] = None,
     ):
         super().__init__(parent)
 
@@ -41,7 +51,8 @@ class SerialComboBox(QComboBox):
         self.device = device_name
         self.setPlaceholderText(placeholder_text)
         self.addItems(self.get_ports())
-        self.setCurrentText(placeholder_text)
+        if value is not None:
+            self.setCurrentText(value)
         self.currentTextChanged.connect(self.connect_device)
 
     def get_ports(self):
