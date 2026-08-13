@@ -101,8 +101,8 @@ def save_model(
 def generate_schema(
     cls: Type[T],
     *,
-    schema_path: Path = Path("../src/Extensions"),
-    extension_path: Path = Path("../src/config/schemas"),
+    schema_path: Path = Path("../src/config/schemas"),
+    extension_path: Path = Path("../src/Extensions"),
 ) -> None:
     """
     Generates the schema of a Pydantic class as well as the respective Bonsai extensions. This function requires that the Bonsai.Sgen tool is installed.
@@ -119,11 +119,12 @@ def generate_schema(
     json_schema = export_schema(cls)
     schema_name = cls.__name__
     _dashed = pascal_to_snake_case(schema_name).replace("_", "-")
-    with open(schema_path, "w", encoding="utf-8") as f:
+    schema_file = schema_path / f"{_dashed}-schema.json"
+    with open(schema_file, "w", encoding="utf-8") as f:
         f.write(json_schema)
 
     bonsai_sgen(
-        schema_path=schema_path / f"{_dashed}-schema.json",
+        schema_path=schema_file,
         output_path=extension_path,
         namespace=schema_name,
         serializer=[BonsaiSgenSerializers.JSON, BonsaiSgenSerializers.YAML],
