@@ -52,9 +52,9 @@ class ExplorerWidget(QWidget):
             case ExplorerType.DIRECTORY:
                 entry = QFileDialog.getExistingDirectory(caption="Pick Directory")
             case ExplorerType.OPEN_FILE:
-                entry = QFileDialog.getOpenFileName(caption="Pick File")
+                entry = QFileDialog.getOpenFileName(caption="Pick File")[0]
             case ExplorerType.SAVE_FILE:
-                entry = QFileDialog.getSaveFileName(caption="Pick File")
+                entry = QFileDialog.getSaveFileName(caption="Pick File")[0]
         self.line.setText(entry)
 
 
