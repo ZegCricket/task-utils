@@ -8,9 +8,11 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
     QHBoxLayout,
+    QLabel,
     QLineEdit,
     QMessageBox,
     QPushButton,
+    QSpinBox,
     QWidget,
 )
 from serial.serialutil import SerialException
@@ -114,3 +116,32 @@ class SerialComboBox(QComboBox):
         if device_id != self.id:
             self.setCurrentIndex(-1)
             QMessageBox.warning(self, "Warning", f"This is not a {self.device}.")
+
+
+class ResolutionWidget(QWidget):
+    def __init__(
+        self,
+        *args,
+        width: int = 1440,
+        height: int = 1080,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self._type = type
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.width = QSpinBox(self, maximum=9999, value=width)
+        layout.addWidget(self.width)
+
+        separator = QLabel("x")
+        layout.addWidget(separator)
+
+        self.height = QSpinBox(self, maximum=9999, value=height)
+        layout.addWidget(self.height)
+
+        self.setLayout(layout)
+
+    def get_resolution(self) -> str:
+        return f"{self.width.value()}x{self.height.value()}"
