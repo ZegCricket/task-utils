@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Optional
 
 import serial.tools.list_ports
@@ -15,9 +16,23 @@ from PySide6.QtWidgets import (
 from serial.serialutil import SerialException
 
 
-class FileExplorer(QWidget):
-    def __init__(self, *args, text: str = "", **kwargs):
+class ExplorerType(StrEnum):
+    DIRECTORY = "directory"
+    OPEN_FILE = "open_file"
+    SAVE_FILE = "save_file"
+
+
+class ExplorerWidget(QWidget):
+    def __init__(
+        self,
+        *args,
+        text: str = "",
+        type: ExplorerType = ExplorerType.DIRECTORY,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
+        self._type = type
+
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -25,14 +40,20 @@ class FileExplorer(QWidget):
         layout.addWidget(self.line)
 
         self.button = QPushButton("Browse", parent=self)
-        self.button.clicked.connect(self.browse_files)
+        self.button.clicked.connect(self.browse)
         layout.addWidget(self.button)
 
         self.setLayout(layout)
 
-    def browse_files(self):
-        file = QFileDialog.getExistingDirectory(caption="Pick Directory")
-        self.line.setText(file)
+    def browse(self) -> None:
+        match self._type:
+            case ExplorerType.DIRECTORY:
+                entry = QFileDialog.getExistingDirectory(caption="Pick Directory")
+            case ExplorerType.OPEN_FILE:
+                entry = QFileDialog.getOpenFile(caption="Pick File")
+            case ExplorerType.SAVE_FILE:
+                entry = QFileDialog.getSaveFile(caption="Pick File")
+        self.line.setText(entry)
 
 
 class SerialComboBox(QComboBox):
