@@ -2,10 +2,11 @@ import datetime
 import json
 from enum import StrEnum
 from pathlib import Path, WindowsPath
-from typing import Optional, Type, TypeVar
+from typing import TypeVar
 
 import yaml
 from pydantic import BaseModel
+from yaml.representer import SafeRepresenter
 
 from task_utils.sgen._utils import (
     BonsaiSgenSerializers,
@@ -25,7 +26,7 @@ class FileType(StrEnum):
     JSON = "json"
 
 
-def load_model(cls: Type[T], path: Path, filetype: FileType) -> T:
+def load_model(cls: type[T], path: Path, filetype: FileType) -> T:
     """
     Loads a model from a file.
 
@@ -52,7 +53,7 @@ def load_model(cls: Type[T], path: Path, filetype: FileType) -> T:
 
 
 def save_model(
-    model: T, path: Path, filetype: FileType, *, schema: Optional[str] = None
+    model: T, path: Path, filetype: FileType, *, schema: str | None = None
 ) -> None:
     """
     Saves a model to a file.
@@ -75,6 +76,11 @@ def save_model(
                 datetime.timedelta, _timedelta_representer, Dumper=yaml.SafeDumper
             )
             yaml.add_representer(WindowsPath, _path_representer, Dumper=yaml.SafeDumper)
+            yaml.add_multi_representer(
+                StrEnum,
+                SafeRepresenter.represent_str,
+                Dumper=yaml.SafeDumper,
+            )
             text = yaml.safe_dump(
                 model.model_dump(exclude_defaults=True),
                 default_flow_style=False,
@@ -99,7 +105,7 @@ def save_model(
 
 
 def generate_schema(
-    cls: Type[T],
+    cls: type[T],
     *,
     schema_path: Path = Path("../src/config/schemas"),
     extension_path: Path = Path("../src/Extensions"),
