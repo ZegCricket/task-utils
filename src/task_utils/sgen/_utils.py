@@ -3,7 +3,7 @@ import json
 from enum import Enum
 from os import PathLike
 from subprocess import CompletedProcess, run
-from typing import Any, List, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, PydanticInvalidForJsonSchema
 from pydantic.json_schema import (
@@ -174,11 +174,11 @@ class CustomGenerateJsonSchema(GenerateJsonSchema):
 
 
 def export_schema(
-    model: Type[T],
-    schema_generator: Type[GenerateJsonSchema] = CustomGenerateJsonSchema,
+    model: type[T],
+    schema_generator: type[GenerateJsonSchema] = CustomGenerateJsonSchema,
     mode: JsonSchemaMode = "serialization",
     def_keyword: str = "definitions",
-    models_title: Optional[str] = None,
+    models_title: str | None = None,
 ):
     """Export the schema of a model to a json file"""
     if not isinstance(model, list):
@@ -208,8 +208,8 @@ def bonsai_sgen(
     schema_path: PathLike,
     output_path: PathLike,
     namespace: str = "DataSchema",
-    root_element: Optional[str] = None,
-    serializer: Optional[List[BonsaiSgenSerializers]] = None,
+    root_element: str | None = None,
+    serializer: list[BonsaiSgenSerializers] | None = None,
     executable: PathLike | str = "dotnet bonsai.sgen",
 ) -> CompletedProcess:
     """Runs Bonsai.SGen to generate a Bonsai-compatible schema from a json-schema model

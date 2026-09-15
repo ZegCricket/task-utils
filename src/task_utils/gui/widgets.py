@@ -1,9 +1,9 @@
 from enum import StrEnum
-from typing import Optional
 
 import serial.tools.list_ports
-from harp.protocol.exceptions import HarpException, HarpTimeoutException
-from harp.serial import Device
+from harp.device import core
+from harp.device.client._transport import TransportError
+from harp.serial import open_device
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -15,7 +15,6 @@ from PySide6.QtWidgets import (
     QSpinBox,
     QWidget,
 )
-from serial.serialutil import SerialException
 
 
 class ExplorerType(StrEnum):
@@ -66,7 +65,7 @@ class SerialComboBox(QComboBox):
         device_name: str,
         placeholder_text: str = "COMx",
         *,
-        value: Optional[str] = None,
+        value: str | None = None,
     ):
         super().__init__(parent)
 
@@ -89,7 +88,7 @@ class SerialComboBox(QComboBox):
 
         return port_strings
 
-    def connect_device(self, text):
+    def connect_device(self, text) -> None:
         if text == "Refresh" or text == "":
             self.setCurrentIndex(-1)
             self.clear()
@@ -97,18 +96,9 @@ class SerialComboBox(QComboBox):
             return
 
         try:
-            device = Device(text)
-            device_id = device.WHO_AM_I
-            device.disconnect()
-        except HarpException:
-            self.setCurrentIndex(-1)
-            QMessageBox.warning(self, "Warning", "This is not a Harp device.")
-            return
-        except HarpTimeoutException:
-            self.setCurrentIndex(-1)
-            QMessageBox.warning(self, "Warning", "This is not a Harp device.")
-            return
-        except SerialException:
+            with open_device(port=text) as device:
+                device_id = device.read(core.WhoAmI).payload
+        except TransportError:
             self.setCurrentIndex(-1)
             QMessageBox.warning(self, "Warning", "This is not a Harp device.")
             return
@@ -132,16 +122,16 @@ class ResolutionWidget(QWidget):
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.width = QSpinBox(self, maximum=9999, value=width)
-        layout.addWidget(self.width)
+        self.width_sb = QSpinBox(self, maximum=9999, value=width)
+        layout.addWidget(self.width_sb)
 
         separator = QLabel("x")
         layout.addWidget(separator)
 
-        self.height = QSpinBox(self, maximum=9999, value=height)
-        layout.addWidget(self.height)
+        self.height_sb = QSpinBox(self, maximum=9999, value=height)
+        layout.addWidget(self.height_sb)
 
         self.setLayout(layout)
 
     def get_resolution(self) -> str:
-        return f"{self.width.value()}x{self.height.value()}"
+        return f"{self.width_sb.value()}x{self.height_sb.value()}"
