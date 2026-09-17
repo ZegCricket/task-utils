@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Annotated, Any, cast
 
 from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
-from pydantic.types import FilePath, StringConstraints
+from pydantic.types import StringConstraints
 from pydantic_core import CoreSchema, PydanticCustomError, core_schema
 
 SerialPort = Annotated[
@@ -12,7 +13,7 @@ SerialPort = Annotated[
 
 
 @dataclass
-class FilePathWithExtension:
+class PathWithExtension:
     extension: Annotated[str, StringConstraints(pattern=r"\.[^.]+$")]
 
     def __get_pydantic_core_schema__(
@@ -30,9 +31,7 @@ class FilePathWithExtension:
         field_schema.update(pattern="\\" + self.extension)
         return field_schema
 
-    def validate_extension(
-        self, path: FilePath, _: core_schema.ValidationInfo
-    ) -> FilePath:
+    def validate_extension(self, path: Path, _: core_schema.ValidationInfo) -> Path:
         if path.suffix == self.extension:
             return path
         else:
