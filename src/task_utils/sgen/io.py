@@ -1,6 +1,7 @@
 import datetime
 import json
 from enum import StrEnum
+from os import PathLike
 from pathlib import Path, WindowsPath
 from typing import TypeVar
 
@@ -19,14 +20,7 @@ from task_utils.sgen._yaml import _path_representer, _timedelta_representer
 T = TypeVar("T", bound=BaseModel)
 
 
-class FileType(StrEnum):
-    """An enum of the allowed file types."""
-
-    YAML = "yaml"
-    JSON = "json"
-
-
-def load_model(cls: type[T], path: Path, filetype: FileType) -> T:
+def load_model(cls: type[T], file_path: str | Path | PathLike) -> T:
     """
     Loads a model from a file.
 
@@ -34,26 +28,36 @@ def load_model(cls: type[T], path: Path, filetype: FileType) -> T:
     ----------
     cls : Type[T]
         The class for which an instance will be loaded.
-    path : Path
+    file_path : str | Path | PathLike
         The path to file containing the model.
-    filetype : FileType
-        Indicates whether the model is loaded from a YAML or a JSON file.
     Returns
     -------
     T
         The model loaded from the file.
     """
+    # Convert to Path object
+    path = Path(file_path).expanduser().resolve()
+    # Verify if file exists
+    if not path.exists():
+        raise FileNotFoundError(f"Path does not exist: {path}")
+
+    # Open file according to extension
     with open(path, "r") as file:
-        match filetype:
-            case FileType.YAML:
+        match path.suffix:
+            case ".yaml" | ".yml":
                 dict = yaml.safe_load(file)
-            case FileType.JSON:
+            case ".json":
                 dict = json.load(file)
+            case _:
+                raise ValueError(
+                    f"This function only supports YAML and JSON files. Files with extension {path.suffix} are not supported"
+                )
+
     return cls(**dict)
 
 
 def save_model(
-    model: T, path: Path, filetype: FileType, *, schema: str | None = None
+    model: T, file_path: str | Path | PathLike, *, schema: str | None = None
 ) -> None:
     """
     Saves a model to a file.
@@ -62,16 +66,17 @@ def save_model(
     ----------
     model : T
         The model to be saved.
-    path : Path
+    file_path : str | Path | PathLike
         The path to which the model will be saved.
-    filetype : FileType
-        Indicates if the model should be saved as a YAML or a JSON file.
     schema : str, optional
         The path or URL to the JSON schema of the model.
     """
+    # Convert file to
+    path = Path(file_path).expanduser().resolve()
+
     # Convert model to string
-    match filetype:
-        case FileType.YAML:
+    match path.suffix:
+        case ".yaml" | ".yml":
             yaml.add_representer(
                 datetime.timedelta, _timedelta_representer, Dumper=yaml.SafeDumper
             )
@@ -94,7 +99,7 @@ def save_model(
 
             with open(path, "w") as file:
                 file.write(text)
-        case FileType.JSON:
+        case ".json":
             model_dict = model.model_dump(exclude_defaults=True)
             # Add header with the schema if it exists
             if schema is not None:
@@ -102,6 +107,10 @@ def save_model(
 
             with open(path, "w") as file:
                 json.dump(model_dict, file, default=str)
+        case _:
+            raise ValueError(
+                f"This function only supports YAML and JSON files. Files with extension {path.suffix} are not supported"
+            )
 
 
 def generate_schema(

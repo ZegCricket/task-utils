@@ -6,18 +6,18 @@ from pydantic import BaseModel
 from pydantic.types import FilePath
 from pydantic_core import ValidationError
 
-from task_utils.sgen.types import FilePathWithExtension, SerialPort
+from task_utils.sgen.types import PathWithExtension, SerialPort
 
 
 class ExampleModel(BaseModel):
-    path: Annotated[FilePath, FilePathWithExtension(".py")]
+    path: Annotated[FilePath, PathWithExtension(".py")]
     serial_port: SerialPort
 
 
 def test_types():
     # TODO: make the first line fail
     # with pytest.raises(ValidationError):
-    new_type = Annotated[FilePath, FilePathWithExtension("py")]
+    new_type = Annotated[FilePath, PathWithExtension("py")]
 
     ExampleModel(path=Path("./tests/__init__.py"), serial_port="/dev/ttyUSB92")
     ExampleModel(path=Path("./tests/__init__.py"), serial_port="COM3")
