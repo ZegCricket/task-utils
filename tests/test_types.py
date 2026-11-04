@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from pydantic.types import FilePath
 from pydantic_core import ValidationError
 
-from task_utils.sgen.types import PathWithExtension, SerialPort
+from tt.sgen.types import PathWithExtension, SerialPort
 
 
 class ExampleModel(BaseModel):

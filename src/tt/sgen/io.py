@@ -9,13 +9,13 @@ import yaml
 from pydantic import BaseModel
 from yaml.representer import SafeRepresenter
 
-from task_utils.sgen._utils import (
+from tt.sgen._utils import (
     BonsaiSgenSerializers,
     bonsai_sgen,
     export_schema,
     pascal_to_snake_case,
 )
-from task_utils.sgen._yaml import _path_representer, _timedelta_representer
+from tt.sgen._yaml import _path_representer, _timedelta_representer
 
 T = TypeVar("T", bound=BaseModel)
 
